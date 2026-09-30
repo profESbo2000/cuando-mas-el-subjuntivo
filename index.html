@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <script>
+  (function pedirClave() {
+    // 🔑 Escribe aquí la contraseña para tus alumnos:
+    const CLAVE_CORRECTA = "ELE2026"; 
+
+    // Comprueba si ya ingresó la clave en esta sesión del navegador
+    if (sessionStorage.getItem("acceso_autorizado") !== "true") {
+      let intento = prompt("🔒 ACTIVIDAD PROTEGIDA\nIngresa la contraseña proporcionada por tu profesor:");
+
+      if (intento === CLAVE_CORRECTA) {
+        sessionStorage.setItem("acceso_autorizado", "true");
+      } else {
+        alert("❌ Contraseña incorrecta. Contacta a tu profesor.");
+        document.write(`
+          <div style="font-family: sans-serif; text-align: center; padding: 50px;">
+            <h2>Acceso Restringido 🔒</h2>
+            <p>Esta actividad es exclusiva para estudiantes registrados.</p>
+            <button onclick="location.reload()">Intentar de nuevo</button>
+          </div>
+        `);
+        window.stop(); // Cancela la carga del resto de la página
+      }
+    }
+  })();
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuando: ¿Indicativo o Subjuntivo? - Máquina del Tiempo ELE</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        comic: ['Bangers', 'cursive'],
+                        sans: ['Fredoka', 'sans-serif'],
+                    },
+                    colors: {
+                        pop: {
+                            yellow: '#facc15',
+                            pink: '#ec4899',
+                            cyan: '#06b6d4',
+                            purple: '#a855f7',
+                            orange: '#f97316',
+                            green: '#22c55e'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #fef08a;
+            background-image: radial-gradient(#fde047 2px, transparent 2px);
+            background-size: 24px 24px;
+        }
+
+        .box-comic {
+            background: #ffffff;
+            border: 3px solid #000000;
+            box-shadow: 5px 5px 0px #000000;
+            border-radius: 1.25rem;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .btn-comic {
+            border: 3px solid #000000;
+            box-shadow: 3px 3px 0px #000000;
+            border-radius: 0.85rem;
+            font-family: 'Bangers', cursive;
+            letter-spacing: 0.05em;
+            transition: all 0.1s ease;
+        }
+        .btn-comic:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px #000000;
+        }
+
+        /* Crucigrama de Alto Contraste */
+        .crossword-cell {
+            width: 38px;
+            height: 38px;
+            border: 2px solid #0f172a;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            border-radius: 6px;
+            background-color: #ffffff;
+            color: #0f172a;
+            font-family: 'Fredoka', sans-serif;
+            transition: all 0.15s;
+        }
+        .crossword-cell:focus {
+            background-color: #fef08a;
+            border-color: #0284c7;
+            outline: none;
+            transform: scale(1.08);
+            z-index: 20;
+        }
+        .crossword-block {
+            background-color: #334155 !important;
+            border: 1px solid #1e293b;
+            border-radius: 6px;
+        }
+
+        @keyframes bounce-slow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-bounce-slow {
+            animation: bounce-slow 2s infinite ease-in-out;
+        }
+
+        .correct-bg { background-color: #bbf7d0 !important; border-color: #16a34a !important; color: #14532d !important; }
+        .incorrect-bg { background-color: #fecdd3 !important; border-color: #e11d48 !important; color: #881337 !important; }
+    </style>
+</head>
+<body class="text-slate-900 min-h-screen flex flex-col font-sans pb-12">
+
+    <!-- Top Navigation Header -->
+    <header class="sticky top-0 z-50 bg-white border-b-4 border-black px-4 py-3 shadow-md">
+        <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-pop-pink text-white rounded-2xl border-3 border-black flex items-center justify-center font-comic text-2xl shadow-[3px_3px_0px_#000]">
+                    ⏰
+                </div>
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-comic tracking-wide text-black leading-none">
+                        ¡CUANDO! ¿Presente o Futuro?
+                    </h1>
+                    <span class="text-xs font-bold bg-pop-yellow text-black border border-black px-2 py-0.5 rounded-full">
+                        Máquina del Tiempo ELE
+                    </span>
+                </div>
+            </div>
+
+            <!-- Tabs de Navegación -->
+            <div class="flex items-center gap-2">
+                <button id="nav-theory" onclick="switchSection('theory')" class="btn-comic bg-pop-cyan text-white px-3 py-2 text-sm sm:text-base">
+                    <i class="fa-solid fa-book-open mr-1"></i> 1. Cómic Teoría
+                </button>
+                <button id="nav-fill" onclick="switchSection('fill')" class="btn-comic bg-white text-black px-3 py-2 text-sm sm:text-base">
+                    <i class="fa-solid fa-pen-nib mr-1"></i> 2. Ejercicios (10)
+                </button>
+                <button id="nav-crossword" onclick="switchSection('crossword')" class="tab-btn btn-comic bg-white text-black px-3 py-2 text-sm sm:text-base">
+                    <i class="fa-solid fa-border-all mr-1"></i> 3. Crucigrama (10)
+                </button>
+                <button id="nav-game" onclick="switchSection('game')" class="tab-btn btn-comic bg-white text-black px-3 py-2 text-sm sm:text-base">
+                    <i class="fa-solid fa-gamepad mr-1"></i> 4. Arcade (10)
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 py-8 flex-grow w-full">
+
+        <!-- SECCIÓN 1: TEORÍA TIPO CÓMIC ANIMADO -->
+        <section id="sec-theory" class="space-y-6">
+            
+            <div class="box-comic p-6 sm:p-8 bg-white relative overflow-hidden">
+                <div class="flex items-center justify-between border-b-4 border-black pb-4 mb-6">
+                    <h2 class="text-2xl sm:text-4xl font-comic text-black flex items-center gap-2">
+                        <span>⚡ La Regla del Viajero del Tiempo</span>
+                    </h2>
+                    <span class="bg-pop-pink text-white font-comic px-3 py-1 text-sm rounded-lg border-2 border-black">
+                        ¡Fácil y Gracioso!
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    <!-- Tarjeta Indicativo (Hábitos / Rutinas) -->
+                    <div class="box-comic p-5 bg-pop-cyan/20 border-3 border-black space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="font-comic text-xl text-black bg-pop-cyan text-white px-3 py-1 rounded-lg border-2 border-black">
+                                🔄 CUANDO + INDICATIVO
+                            </span>
+                            <span class="text-2xl">☕</span>
+                        </div>
+                        <h3 class="font-bold text-lg text-black">Significado: Rutinas, Hábitos o Pasado</h3>
+                        <p class="text-sm font-semibold text-slate-700 leading-snug">
+                            Equivale a <em>"Siempre que..."</em> o cosas que suceden habitualmente.
+                        </p>
+                        <div class="bg-white p-3 rounded-xl border-2 border-black text-xs sm:text-sm font-bold space-y-2">
+                            <p class="text-slate-800">🍷 <i>"Cuando bebo mucho alcohol, me duele la cabeza."</i></p>
+                            <p class="text-slate-800">✈️ <i>"Cuando viajo en avión, me pitan los oídos."</i></p>
+                        </div>
+                    </div>
+
+                    <!-- Tarjeta Subjuntivo (Futuro) -->
+                    <div class="box-comic p-5 bg-pop-pink/20 border-3 border-black space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="font-comic text-xl text-black bg-pop-pink text-white px-3 py-1 rounded-lg border-2 border-black">
+                                🚀 CUANDO + SUBJUNTIVO
+                            </span>
+                            <span class="text-2xl">🔮</span>
+                        </div>
+                        <h3 class="font-bold text-lg text-black">Significado: Un Momento FUTURO</h3>
+                        <p class="text-sm font-semibold text-slate-700 leading-snug">
+                            Acompañado de <strong>Futuro Simple</strong> o de un <strong>Imperativo</strong>.
+                        </p>
+                        <div class="bg-white p-3 rounded-xl border-2 border-black text-xs sm:text-sm font-bold space-y-2">
+                            <p class="text-slate-800">🚛 <i>"Cuando sea mayor, tendré un camión."</i></p>
+                            <p class="text-slate-800">📞 <i>"Cuando salgas de la escuela, llámame."</i></p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Meme / Ilustración Dinámica -->
+                <div class="mt-8 box-comic p-6 bg-pop-yellow/40 border-3 border-black flex flex-col md:flex-row items-center gap-6">
+                    <div class="w-24 h-24 bg-white border-3 border-black rounded-2xl flex items-center justify-center text-5xl animate-bounce-slow shrink-0">
+                        👶
+                    </div>
+                    <div class="space-y-2 text-center md:text-left">
+                        <div class="inline-block bg-white border-2 border-black px-4 py-1.5 rounded-full font-bold text-xs uppercase tracking-wider text-black">
+                            Escena del Cómic
+                        </div>
+                        <h4 class="font-comic text-2xl text-black">«Cuando sea mayor, tendré un camión»</h4>
+                        <p class="text-sm font-semibold text-slate-700">
+                            El niño aún no es mayor (es una idea futura) $\to$ por eso usa el <strong>Subjuntivo (sea)</strong> + <strong>Futuro (tendré)</strong>.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mt-6 text-center">
+                    <button onclick="switchSection('fill')" class="btn-comic bg-pop-green text-white px-8 py-3 text-lg hover:bg-emerald-600">
+                        ¡Entendido! Ir a los Ejercicios <i class="fa-solid fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- SECCIÓN 2: ORÁCULO DE LA GUÍA (10 EJERCICIOS) -->
+        <section id="sec-fill" class="space-y-6 hidden">
+            <div class="box-comic p-6 sm:p-8 bg-white">
+                
+                <div class="flex items-center justify-between border-b-4 border-black pb-4 mb-6">
+                    <div>
+                        <span class="bg-pop-purple text-white font-comic px-3 py-1 text-sm rounded-lg border-2 border-black">
+                            Apartado 8 de la Guía
+                        </span>
+                        <h3 class="text-2xl sm:text-3xl font-comic text-black mt-1">
+                            Completa las oraciones (10)
+                        </h3>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4" id="fill-questions-container">
+                    <!-- Inyectado por Javascript -->
+                </div>
+
+                <div class="flex flex-wrap items-center justify-center gap-4 mt-8 pt-6 border-t-4 border-black">
+                    <button onclick="checkFillSection()" class="btn-comic bg-pop-pink text-white px-8 py-3 text-lg">
+                        <i class="fa-solid fa-check-double mr-2"></i> Verificar Respuestas
+                    </button>
+                    <button onclick="resetFillSection()" class="btn-comic bg-white text-black px-6 py-3 text-sm">
+                        <i class="fa-solid fa-rotate-left mr-2"></i> Reiniciar
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECCIÓN 3: CRUCIGRAMA INTERACTIVO (ALTO CONTRASTE Y NÚMEROS GRANDES) -->
+        <section id="sec-crossword" class="space-y-6 hidden">
+            <div class="box-comic p-6 sm:p-8 bg-white">
+                
+                <div class="flex items-center justify-between border-b-4 border-black pb-4 mb-6">
+                    <div>
+                        <span class="bg-pop-yellow text-black font-comic px-3 py-1 text-sm rounded-lg border-2 border-black">
+                            Actividad Especial
+                        </span>
+                        <h3 class="text-2xl sm:text-3xl font-comic text-black mt-1">
+                            🧩 Crucigrama Gramatical
+                        </h3>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    
+                    <!-- Tablero de Crucigrama de Alto Contraste -->
+                    <div class="flex justify-center bg-slate-900 p-6 rounded-2xl border-4 border-black overflow-x-auto shadow-2xl">
+                        <div id="crossword-grid" class="grid grid-cols-10 gap-1.5">
+                            <!-- Inyectado dinámicamente -->
+                        </div>
+                    </div>
+
+                    <!-- Pistas Horizontales y Verticales -->
+                    <div class="space-y-4 text-xs sm:text-sm font-semibold">
+                        <div class="box-comic p-4 bg-pop-cyan/10 border-2 border-black">
+                            <h4 class="font-comic text-lg text-black mb-2 flex items-center gap-2">
+                                <i class="fa-solid fa-arrows-left-right text-pop-cyan"></i> HORIZONTALES
+                            </h4>
+                            <ul class="space-y-2 text-slate-800" id="clues-horizontal">
+                                <!-- Inyectado dinámicamente -->
+                            </ul>
+                        </div>
+
+                        <div class="box-comic p-4 bg-pop-pink/10 border-2 border-black">
+                            <h4 class="font-comic text-lg text-black mb-2 flex items-center gap-2">
+                                <i class="fa-solid fa-arrows-up-down text-pop-pink"></i> VERTICALES
+                            </h4>
+                            <ul class="space-y-2 text-slate-800" id="clues-vertical">
+                                <!-- Inyectado dinámicamente -->
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="flex justify-center gap-4 mt-8 pt-6 border-t-4 border-black">
+                    <button onclick="checkCrossword()" class="btn-comic bg-pop-green text-white px-8 py-3 text-lg">
+                        <i class="fa-solid fa-trophy mr-2"></i> Validar Crucigrama
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECCIÓN 4: ARCADE DE DECISIÓN RÁPIDA (10 EJERCICIOS) -->
+        <section id="sec-game" class="space-y-6 hidden">
+            <div class="box-comic p-6 sm:p-8 bg-white text-center">
+                
+                <span class="bg-pop-orange text-white font-comic px-3 py-1 text-sm rounded-lg border-2 border-black">
+                    Minijuego Arcade
+                </span>
+                <h3 class="text-3xl font-comic text-black mt-2">⚡ Clasificador Espacio-Temporal</h3>
+                <p class="text-sm font-bold text-slate-600 mb-6">
+                    ¿La oración se refiere a un <strong>Hábito Frecuente</strong> (Indicativo) o a un <strong>Momento Futuro</strong> (Subjuntivo)?
+                </p>
+
+                <!-- Tarjeta del Juego Arcade -->
+                <div id="arcade-card" class="box-comic p-8 bg-pop-yellow/30 border-4 border-black max-w-xl mx-auto min-h-[220px] flex flex-col justify-between items-center my-4">
+                    <div class="w-full flex justify-between text-xs font-bold font-comic text-slate-500">
+                        <span id="arcade-step">PREGUNTA 1 DE 10</span>
+                        <span id="arcade-score" class="text-pop-pink text-sm">PUNTOS: 0</span>
+                    </div>
+
+                    <div id="arcade-text" class="text-xl sm:text-2xl font-bold text-black my-4">
+                        <!-- Texto inyectado -->
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 w-full">
+                        <button onclick="answerArcade('indicativo')" class="btn-comic bg-pop-cyan text-white py-3 text-base">
+                            🔄 HÁBITO / RUTINA<br><span class="text-xs font-sans font-normal">(Indicativo)</span>
+                        </button>
+                        <button onclick="answerArcade('subjuntivo')" class="btn-comic bg-pop-pink text-white py-3 text-base">
+                            🚀 PLAN FUTURO<br><span class="text-xs font-sans font-normal">(Subjuntivo)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="arcade-feedback" class="h-8 font-bold text-sm"></div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-auto border-t-4 border-black bg-white py-4 text-center text-xs font-bold text-black">
+        <p>Español Lengua Extranjera (ELE) • Material Didáctico e Interactivo</p>
+    </footer>
+
+    <script>
+        // Datos del Ejercicio 8 de la Guía (10 Oraciones)
+        const fillData = [
+            { id: "f1", prefix: "1. Cuando yo", verb: "esperar", suffix: "al autobús suelo ir abrigado.", target: "espero", hint: "Rutina / Hábito" },
+            { id: "f2", prefix: "2. Cuando", verb: "morir", suffix: "mi abuelo, ella se quedará sola.", target: "muera", hint: "Acción Futura" },
+            { id: "f3", prefix: "3. Avísame cuando tu tren", verb: "salir", suffix: "de la estación.", target: "salga", hint: "Acción Futura" },
+            { id: "f4", prefix: "4. Cuando él", verb: "enviar", suffix: "un email no usa apenas palabras.", target: "envia", alt: "envía", hint: "Hábito Frecuente" },
+            { id: "f5", prefix: "5. Cuando mi hijo", verb: "soñar", suffix: "se despierta muy feliz.", target: "sueña", hint: "Hábito Frecuente" },
+            { id: "f6", prefix: "6. Sabrás lo que es bueno cuando", verb: "probar", suffix: "el aliño.", target: "pruebes", hint: "Acción Futura" },
+            { id: "f7", prefix: "7. Cuando", verb: "entrar", suffix: "en la tienda verás que ha cambiado.", target: "entres", hint: "Acción Futura" },
+            { id: "f8", prefix: "8. Mi marido llora cuando", verb: "cortar", suffix: "cebolla.", target: "corta", hint: "Hábito Frecuente" },
+            { id: "f9", prefix: "9. Cuando", verb: "terminar", suffix: "el trabajo llámame, te esperaré.", target: "termines", hint: "Acción Futura" },
+            { id: "f10", prefix: "10. Cuando", verb: "viajar", suffix: "en avión me pitan los oídos.", target: "viajo", hint: "Rutina habitual" }
+        ];
+
+        // Datos del Crucigrama (Grid de 10x10)
+        const crosswordWords = [
+            { num: 1, dir: "H", row: 0, col: 0, word: "ESPERO", clue: "Cuando yo (esperar) el autobús suelo ir abrigado." },
+            { num: 2, dir: "H", row: 2, col: 1, word: "TENGAN", clue: "Cuando ustedes (tener) tiempo, vengan a visitarme." },
+            { num: 3, dir: "H", row: 4, col: 2, word: "PRUEBES", clue: "Sabrás lo que es bueno cuando (probar) el aliño." },
+            { num: 4, dir: "H", row: 6, col: 0, word: "CORTA", clue: "Mi marido llora cuando (cortar) cebolla." },
+            { num: 5, dir: "H", row: 8, col: 3, word: "SALGA", clue: "Avísame cuando tu tren (salir) de la estación." },
+            { num: 6, dir: "V", row: 0, col: 1, word: "MUERA", clue: "Cuando (morir) mi abuelo, ella se quedará sola." },
+            { num: 7, dir: "V", row: 3, col: 3, word: "VIAJO", clue: "Cuando yo (viajar) en avión me pitan los oídos." },
+            { num: 8, dir: "V", row: 1, col: 5, word: "SUENA", clue: "Cuando mi hijo (soñar) se despierta muy feliz." },
+            { num: 9, dir: "V", row: 0, col: 7, word: "ENTRES", clue: "Cuando (entrar) en la tienda verás los cambios." },
+            { num: 10, dir: "V", row: 1, col: 9, word: "TERMINES", clue: "Cuando (terminar) el trabajo, llámame." }
+        ];
+
+        // Datos para el Arcade de Velocidad
+        const arcadeData = [
+            { text: "«Cuando llego a casa, siempre me quito los zapatos.»", type: "indicativo" },
+            { text: "«Cuando tenga 50 años, viviré en México.»", type: "subjuntivo" },
+            { text: "«Llamaré a mi madre cuando termine de cenar.»", type: "subjuntivo" },
+            { text: "«Cuando tomo café por la noche, no puedo dormir.»", type: "indicativo" },
+            { text: "«Cuando tengas dudas, consúltame inmediatamente.»", type: "subjuntivo" },
+            { text: "«Mi gato se esconde cuando escucha la aspiradora.»", type: "indicativo" },
+            { text: "«Compraré una casa cuando ahorre suficiente dinero.»", type: "subjuntivo" },
+            { text: "«Cuando salgo de vacaciones, desconecto el móvil.»", type: "indicativo" },
+            { text: "«Cuando entres en la sala, mantén el silencio.»", type: "subjuntivo" },
+            { text: "«Mi hermano sonríe cuando ve su plato favorito.»", type: "indicativo" }
+        ];
+
+        let arcadeIndex = 0;
+        let arcadeScore = 0;
+
+        // Navegación
+        function switchSection(sec) {
+            document.getElementById('sec-theory').classList.add('hidden');
+            document.getElementById('sec-fill').classList.add('hidden');
+            document.getElementById('sec-crossword').classList.add('hidden');
+            document.getElementById('sec-game').classList.add('hidden');
+
+            const btnInactive = "tab-btn btn-comic bg-white text-black px-3 py-2 text-sm sm:text-base";
+            const btnActive = "tab-btn btn-comic bg-pop-cyan text-white px-3 py-2 text-sm sm:text-base";
+
+            document.getElementById('nav-theory').className = btnInactive;
+            document.getElementById('nav-fill').className = btnInactive;
+            document.getElementById('nav-crossword').className = btnInactive;
+            document.getElementById('nav-game').className = btnInactive;
+
+            if (sec === 'theory') {
+                document.getElementById('sec-theory').classList.remove('hidden');
+                document.getElementById('nav-theory').className = btnActive;
+            } else if (sec === 'fill') {
+                document.getElementById('sec-fill').classList.remove('hidden');
+                document.getElementById('nav-fill').className = btnActive;
+            } else if (sec === 'crossword') {
+                document.getElementById('sec-crossword').classList.remove('hidden');
+                document.getElementById('nav-crossword').className = btnActive;
+            } else if (sec === 'game') {
+                document.getElementById('sec-game').classList.remove('hidden');
+                document.getElementById('nav-game').className = btnActive;
+                startArcade();
+            }
+        }
+
+        // Renderizar Apartado 2
+        function renderFillSection() {
+            const container = document.getElementById('fill-questions-container');
+            container.innerHTML = '';
+
+            fillData.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "box-comic p-4 bg-slate-50 border-2 border-black flex flex-wrap items-center gap-2 text-sm sm:text-base font-medium font-sans";
+                card.innerHTML = `
+                    <span class="text-slate-900 font-semibold">${item.prefix}</span>
+                    <span class="text-slate-500 font-normal">(${item.verb})</span>
+                    <input type="text" id="${item.id}" class="border-2 border-slate-900 bg-white rounded-lg px-3 py-1 w-32 text-center font-bold text-slate-900 font-sans focus:outline-none focus:ring-2 focus:ring-pop-cyan" autocomplete="off">
+                    <span class="text-slate-900 font-semibold">${item.suffix}</span>
+                    <span class="ml-auto bg-pop-yellow text-black text-xs font-bold px-3 py-1 rounded-full border border-black font-sans">${item.hint}</span>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function normalizeText(str) {
+            return str.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        }
+
+        function checkFillSection() {
+            let correct = 0;
+            fillData.forEach(item => {
+                const input = document.getElementById(item.id);
+                const val = normalizeText(input.value);
+                const targetNorm = normalizeText(item.target);
+                const altNorm = item.alt ? normalizeText(item.alt) : null;
+
+                if (val === targetNorm || (altNorm && val === altNorm)) {
+                    input.className = "border-2 rounded-lg px-3 py-1 w-32 text-center font-bold font-sans correct-bg";
+                    correct++;
+                } else {
+                    input.className = "border-2 rounded-lg px-3 py-1 w-32 text-center font-bold font-sans incorrect-bg";
+                }
+            });
+
+            if (correct === fillData.length) {
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            }
+        }
+
+        function resetFillSection() {
+            fillData.forEach(item => {
+                const input = document.getElementById(item.id);
+                input.value = '';
+                input.className = "border-2 border-slate-900 bg-white rounded-lg px-3 py-1 w-32 text-center font-bold text-slate-900 font-sans";
+            });
+        }
+
+        // Renderizar Crucigrama con mayor contraste y números grandes
+        function renderCrossword() {
+            const grid = document.getElementById('crossword-grid');
+            grid.innerHTML = '';
+
+            // Matriz 10x10 vacía
+            let matrix = Array(10).fill(null).map(() => Array(10).fill(null));
+
+            crosswordWords.forEach(w => {
+                for (let i = 0; i < w.word.length; i++) {
+                    let r = w.dir === "H" ? w.row : w.row + i;
+                    let c = w.dir === "H" ? w.col + i : w.col;
+                    matrix[r][c] = { letter: w.word[i], num: (i === 0 ? w.num : null) };
+                }
+            });
+
+            for (let r = 0; r < 10; r++) {
+                for (let c = 0; c < 10; c++) {
+                    const cellData = matrix[r][c];
+                    if (cellData) {
+                        const cellHtml = `
+                            <div class="relative">
+                                ${cellData.num ? `<span class="absolute top-0.5 left-1 text-[11px] font-extrabold text-sky-700 pointer-events-none drop-shadow-sm">${cellData.num}</span>` : ''}
+                                <input type="text" maxlength="1" id="cell_${r}_${c}" data-letter="${cellData.letter}" class="crossword-cell" autocomplete="off">
+                            </div>
+                        `;
+                        grid.innerHTML += cellHtml;
+                    } else {
+                        grid.innerHTML += `<div class="crossword-cell crossword-block"></div>`;
+                    }
+                }
+            }
+
+            // Renderizar Pistas
+            const horList = document.getElementById('clues-horizontal');
+            const verList = document.getElementById('clues-vertical');
+            horList.innerHTML = '';
+            verList.innerHTML = '';
+
+            crosswordWords.forEach(w => {
+                const li = `<li class="font-medium text-slate-700"><span class="font-bold text-pop-purple">${w.num}.</span> ${w.clue}</li>`;
+                if (w.dir === 'H') horList.innerHTML += li;
+                else verList.innerHTML += li;
+            });
+        }
+
+        function checkCrossword() {
+            let correct = true;
+            for (let r = 0; r < 10; r++) {
+                for (let c = 0; c < 10; c++) {
+                    const cell = document.getElementById(`cell_${r}_${c}`);
+                    if (cell) {
+                        const expected = cell.getAttribute('data-letter');
+                        if (normalizeText(cell.value) === normalizeText(expected)) {
+                            cell.classList.add('correct-bg');
+                            cell.classList.remove('incorrect-bg');
+                        } else {
+                            cell.classList.add('incorrect-bg');
+                            cell.classList.remove('correct-bg');
+                            correct = false;
+                        }
+                    }
+                }
+            }
+
+            if (correct) {
+                confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+            }
+        }
+
+        // Minijuego Arcade
+        function startArcade() {
+            arcadeIndex = 0;
+            arcadeScore = 0;
+            showArcadeQuestion();
+        }
+
+        function showArcadeQuestion() {
+            if (arcadeIndex >= arcadeData.length) {
+                document.getElementById('arcade-card').innerHTML = `
+                    <div class="text-center space-y-4 my-auto">
+                        <div class="text-5xl">🏆</div>
+                        <h4 class="font-comic text-3xl text-black">¡FIN DEL JUEGO ARCADE!</h4>
+                        <p class="font-bold text-lg">Puntuación Final: <span class="text-pop-pink text-2xl">${arcadeScore} / 10</span></p>
+                        <button onclick="startArcade()" class="btn-comic bg-pop-green text-white px-6 py-2 text-base">
+                            Jugar de Nuevo
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            const current = arcadeData[arcadeIndex];
+            document.getElementById('arcade-step').innerText = `PREGUNTA ${arcadeIndex + 1} DE 10`;
+            document.getElementById('arcade-score').innerText = `PUNTOS: ${arcadeScore}`;
+            document.getElementById('arcade-text').innerText = current.text;
+            document.getElementById('arcade-feedback').innerText = '';
+        }
+
+        function answerArcade(choice) {
+            const current = arcadeData[arcadeIndex];
+            const feedback = document.getElementById('arcade-feedback');
+
+            if (choice === current.type) {
+                arcadeScore++;
+                feedback.className = "h-8 font-bold text-sm text-emerald-600";
+                feedback.innerText = "¡CORRECTO! +1 Punto 🌟";
+            } else {
+                feedback.className = "h-8 font-bold text-sm text-rose-600";
+                feedback.innerText = "¡INCORRECTO! ❌";
+            }
+
+            arcadeIndex++;
+            setTimeout(() => {
+                showArcadeQuestion();
+            }, 900);
+        }
+
+        window.onload = function() {
+            renderFillSection();
+            renderCrossword();
+        };
+    </script>
+</body>
+</html>
